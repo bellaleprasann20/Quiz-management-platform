@@ -20,7 +20,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# === ROBUST CORS SETUP FOR PRODUCTION ===
+# === CLEAN CORS SETUP ===
 origins = [
     "http://localhost:3000", 
     "http://127.0.0.1:3000", 
@@ -31,7 +31,6 @@ origins = [
 # Fetch the frontend URL from Render environment variables
 frontend_url = os.getenv("FRONTEND_URL")
 
-# If Render has the variable, add it to our allowed list
 if frontend_url:
     origins.append(frontend_url)
 
@@ -54,4 +53,4 @@ app.include_router(leaderboard.router, prefix="/api/v1")
 
 @app.get("/")
 def root():
-    return {"message": "API is online!"}
+    return {"message": "API is running"}
