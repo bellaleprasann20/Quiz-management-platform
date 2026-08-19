@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os # NEW: Import os to read environment variables
 
 from app.core.database import engine, Base
 from app.core.config import settings
@@ -20,15 +21,25 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Added 127.0.0.1 variations to ensure React is never blocked
+# === NEW CORS SETUP ===
+# 1. Keep local addresses so you can still test on your computer
+origins = [
+    "http://localhost:3000", 
+    "http://127.0.0.1:3000", 
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+]
+
+# 2. Grab the production frontend URL from the environment (Render)
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    origins.append(frontend_url)
+    # Vercel often creates preview URLs, so if you run into strict CORS issues later,
+    # you can temporarily set origins = ["*"] during your initial testing phase.
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://127.0.0.1:3000", 
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ], 
+    allow_origins=origins, 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -14,8 +14,8 @@ const Quizzes = () => {
     const fetchQuizzes = async () => {
       try {
         // Fetch all quizzes from the backend
-        // Admins should ideally see drafts and published quizzes
-        const response = await axios.get('http://127.0.0.1:8000/api/v1/quizzes/');
+        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/quizzes/`);
         setQuizzes(response.data);
       } catch (error) {
         console.error("Failed to fetch quizzes:", error);

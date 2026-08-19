@@ -38,8 +38,8 @@ const Profile = () => {
     const payload = { name, phone, location, title, bio, password };
     
     try {
-      // Make sure this URL matches your actual FastAPI backend URL
-      await axios.put("http://127.0.0.1:8000/api/v1/users/profile", payload, {
+      // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/v1/users/profile`, payload, {
         headers: { 
           Authorization: `Bearer ${token}` 
         } 

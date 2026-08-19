@@ -21,11 +21,15 @@ const Dashboard = () => {
   useEffect(() => {
     // 1. Get the user from Local Storage
     const userString = localStorage.getItem('user');
-    const token = localStorage.getItem('token'); // Assuming you store the auth token here
+    const token = localStorage.getItem('token'); 
     
     if (userString) {
       const currentUser = JSON.parse(userString);
-      setFirstName(currentUser?.name?.split(' ')[0] || 'Student');
+      
+      // FIX 1: Safely check multiple possible keys for the user's name
+      console.log("User object from LocalStorage:", currentUser);
+      const displayName = currentUser?.username || currentUser?.name || currentUser?.first_name || 'Student';
+      setFirstName(displayName.split(' ')[0]);
     }
 
     // 2. Fetch the real data from FastAPI
@@ -35,16 +39,16 @@ const Dashboard = () => {
           headers: { Authorization: `Bearer ${token}` }
         };
 
-        // Fetch real user stats
-        const statsResponse = await axios.get('http://127.0.0.1:8000/api/v1/analytics/student/me', config);
-        // If the backend returns data, update the state (otherwise fallback to 0s)
+        // FIX 2: Replaced hardcoded localhost with the Vercel-ready environment variable
+        const statsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/analytics/student/me`, config);
+        
         if (statsResponse.data && Object.keys(statsResponse.data).length > 0) {
            setStats(statsResponse.data);
         }
 
-        // Fetch real quizzes for the "Recommended" section
-        const quizzesResponse = await axios.get('http://127.0.0.1:8000/api/v1/quizzes/', config);
-        // Grab the first 2 quizzes for the UI
+        // FIX 2: Replaced hardcoded localhost with the Vercel-ready environment variable
+        const quizzesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/quizzes/`, config);
+        
         setRecommendedQuizzes(quizzesResponse.data.slice(0, 2));
 
       } catch (error) {

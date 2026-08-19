@@ -46,7 +46,8 @@ const Login = () => {
         }
       } else {
         // === CREATE ACCOUNT LOGIC (Students Only) ===
-        await axios.post('http://127.0.0.1:8000/api/v1/users/register', {
+        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/register`, {
           username: formData.username,
           email: formData.email,
           password: formData.password,
@@ -154,7 +155,11 @@ const Login = () => {
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-sm font-medium text-slate-700">Password</label>
               {isLogin && (
-                <button type="button" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/auth/forgot-password')} 
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                >
                   Forgot password?
                 </button>
               )}

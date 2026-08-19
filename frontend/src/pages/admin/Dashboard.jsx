@@ -31,10 +31,12 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // FIXED: Make one single call to your powerful new backend endpoint!
+        // Make one single call to your powerful new backend endpoint!
         // Make sure you include auth headers if your admin route is protected
         const token = localStorage.getItem('token'); 
-        const res = await axios.get('http://127.0.0.1:8000/api/v1/analytics/admin', {
+        
+        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/analytics/admin`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
 

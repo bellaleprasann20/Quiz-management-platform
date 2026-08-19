@@ -16,7 +16,8 @@ const Questions = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/v1/questions/quiz/${quizId}`);
+        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/questions/quiz/${quizId}`);
         setQuestions(response.data);
       } catch (error) {
         console.error("Failed to fetch questions:", error);
@@ -34,7 +35,8 @@ const Questions = () => {
     if (!window.confirm("Are you sure you want to delete this question?")) return;
     
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/v1/questions/${questionId}`);
+      // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/questions/${questionId}`);
       setQuestions(questions.filter(q => q.id !== questionId));
       toast.success("Question deleted.");
     } catch (error) {
@@ -46,7 +48,8 @@ const Questions = () => {
   // NEW: Handler to instantly update the correct option via API and UI
   const handleSetCorrectOption = async (questionId, optionId) => {
     try {
-      await axios.put(`http://127.0.0.1:8000/api/v1/questions/${questionId}/correct-option/${optionId}`);
+      // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/v1/questions/${questionId}/correct-option/${optionId}`);
       
       // Instantly update the UI without needing a full page reload
       setQuestions(questions.map(q => {

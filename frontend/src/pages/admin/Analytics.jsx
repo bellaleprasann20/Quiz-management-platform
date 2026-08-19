@@ -16,9 +16,10 @@ const Analytics = () => {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         // Fetch users AND analytics concurrently
+        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
         const [usersRes, analyticsRes] = await Promise.all([
-          axios.get('http://127.0.0.1:8000/api/v1/users/', { headers }),
-          axios.get('http://127.0.0.1:8000/api/v1/analytics/admin', { headers })
+          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/analytics/admin`, { headers })
         ]);
         
         // 1. Process Students

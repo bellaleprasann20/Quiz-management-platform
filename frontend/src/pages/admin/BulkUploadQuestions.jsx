@@ -43,8 +43,9 @@ const BulkUploadQuestions = () => {
     try {
       const token = localStorage.getItem('token');
       
+      // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
       const response = await axios.post(
-        `http://127.0.0.1:8000/api/v1/questions/bulk-upload/${quizId}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/questions/bulk-upload/${quizId}`,
         formData,
         {
           headers: { 

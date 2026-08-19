@@ -39,7 +39,8 @@ const AiInterview = () => {
         stopScreenShare();
 
         try {
-          await axios.post('http://127.0.0.1:8000/api/v1/interviews/cheat-detected', {}, {
+          // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+          await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/interviews/cheat-detected`, {}, {
             headers: getAuthHeaders()
           });
         } catch (err) {

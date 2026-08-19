@@ -27,8 +27,8 @@ const QuizForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Fetch Categories
-        const catRes = await axios.get('http://127.0.0.1:8000/api/v1/categories/');
+        // 1. Fetch Categories - FIX APPLIED HERE
+        const catRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/categories/`);
         setCategories(catRes.data);
         
         // Default to the first category if creating a new quiz
@@ -36,9 +36,9 @@ const QuizForm = () => {
           setFormData(prev => ({ ...prev, category_id: catRes.data[0].id }));
         }
 
-        // 2. Fetch Quiz Data if Editing
+        // 2. Fetch Quiz Data if Editing - FIX APPLIED HERE
         if (isEditing) {
-          const quizRes = await axios.get(`http://127.0.0.1:8000/api/v1/quizzes/${quizId}`);
+          const quizRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/quizzes/${quizId}`);
           setFormData({
             title: quizRes.data.title || '',
             description: quizRes.data.description || '',
@@ -70,11 +70,11 @@ const QuizForm = () => {
 
     try {
       if (isEditing) {
-        // Update existing quiz (Assuming your backend has a PUT route for this)
-        await axios.put(`http://127.0.0.1:8000/api/v1/quizzes/${quizId}`, formData);
+        // Update existing quiz - FIX APPLIED HERE
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/v1/quizzes/${quizId}`, formData);
       } else {
-        // Create new quiz
-        await axios.post('http://127.0.0.1:8000/api/v1/quizzes/', formData);
+        // Create new quiz - FIX APPLIED HERE
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/quizzes/`, formData);
       }
       // Redirect back to quizzes list on success
       navigate('/admin/quizzes');

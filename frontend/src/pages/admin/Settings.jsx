@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Save, Loader2, CheckCircle2 } from 'lucide-react';
 import Button from '../../components/common/Button';
+import axios from 'axios'; // Added this so it's ready for you when you uncomment the API call!
 
 const Settings = () => {
   // State to hold all our form values
@@ -34,7 +35,8 @@ const Settings = () => {
 
     try {
       // TODO: Replace this timeout with a real Axios call when your backend endpoint is ready
-      // await axios.put('http://127.0.0.1:8000/api/v1/settings', formData);
+      // FIX APPLIED HERE: Replaced the hardcoded localhost string in the comment with the env variable
+      // await axios.put(`${import.meta.env.VITE_API_URL}/api/v1/settings`, formData);
       
       // Simulating a network delay
       await new Promise((resolve) => setTimeout(resolve, 1000));

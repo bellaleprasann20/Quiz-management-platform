@@ -16,7 +16,8 @@ const Users = () => {
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         
-        const response = await axios.get('http://127.0.0.1:8000/api/v1/users/', { headers });
+        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/`, { headers });
         
         // FIXED: Safe extraction to prevent .filter() crashes if data is an object
         const usersArray = Array.isArray(response.data) 

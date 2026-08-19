@@ -3,22 +3,26 @@ import api from './api';
 
 const questionService = {
   getQuestionsByQuiz: async (quizId) => {
-    const response = await api.get(`/quizzes/${quizId}/questions`);
+    // FIX APPLIED: Added /api/v1
+    const response = await api.get(`/api/v1/quizzes/${quizId}/questions`);
     return response.data;
   },
 
   createQuestion: async (quizId, questionData) => {
-    const response = await api.post(`/quizzes/${quizId}/questions`, questionData);
+    // FIX APPLIED: Added /api/v1
+    const response = await api.post(`/api/v1/quizzes/${quizId}/questions`, questionData);
     return response.data;
   },
 
   updateQuestion: async (questionId, questionData) => {
-    const response = await api.put(`/questions/${questionId}`, questionData);
+    // FIX APPLIED: Added /api/v1
+    const response = await api.put(`/api/v1/questions/${questionId}`, questionData);
     return response.data;
   },
 
   deleteQuestion: async (questionId) => {
-    const response = await api.delete(`/questions/${questionId}`);
+    // FIX APPLIED: Added /api/v1
+    const response = await api.delete(`/api/v1/questions/${questionId}`);
     return response.data;
   }
 };

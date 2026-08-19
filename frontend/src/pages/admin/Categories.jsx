@@ -8,7 +8,7 @@ import axios from 'axios';
 const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate(); // NEW: Hook to make categories clickable
+  const navigate = useNavigate(); 
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,12 +26,11 @@ const Categories = () => {
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      // FIXED: Added Auth headers
-      const response = await axios.get('http://127.0.0.1:8000/api/v1/categories/', {
+      // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/categories/`, {
         headers: getAuthHeaders()
       });
       
-      // FIXED: Safely extract the array just like we did in Users.jsx
       const catsArray = Array.isArray(response.data) 
         ? response.data 
         : response.data.items || response.data.categories || response.data.data || [];
@@ -60,8 +59,8 @@ const Categories = () => {
 
     setIsSubmitting(true);
     try {
-      // FIXED: Added Auth headers for the POST request
-      await axios.post('http://127.0.0.1:8000/api/v1/categories/', formData, {
+      // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/categories/`, formData, {
         headers: getAuthHeaders()
       });
       
@@ -105,7 +104,6 @@ const Categories = () => {
           {categories.map((cat) => (
             <div 
               key={cat.id} 
-              // NEW: Added cursor-pointer and onClick navigation
               onClick={() => navigate(`/admin/quizzes?category=${cat.id}`)}
               className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 cursor-pointer transition-all group"
             >
@@ -114,7 +112,6 @@ const Categories = () => {
                   <Folder className="w-6 h-6" />
                 </div>
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {/* NEW: Stop propagation so clicking edit/delete doesn't trigger the card navigation */}
                   <button 
                     onClick={(e) => { e.stopPropagation(); /* Add edit logic later */ }}
                     className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
@@ -135,7 +132,6 @@ const Categories = () => {
               </p>
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                 <span className="text-sm font-medium text-slate-600">
-                  {/* Safely defaults to 0 if your backend doesn't send quiz_count yet */}
                   {cat.quiz_count || 0} Quizzes
                 </span>
                 <span className="text-sm font-semibold text-indigo-600 flex items-center group-hover:translate-x-1 transition-transform">

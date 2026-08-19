@@ -68,10 +68,12 @@ const QuestionForm = () => {
     try {
       if (isEditing) {
         // Edit existing question (if your backend supports it)
-        await axios.put(`http://127.0.0.1:8000/api/v1/questions/${questionId}`, payload);
+        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/v1/questions/${questionId}`, payload);
       } else {
         // Create new question
-        await axios.post('http://127.0.0.1:8000/api/v1/questions/', payload);
+        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/questions/`, payload);
       }
       
       // Redirect back to the Question Bank for this specific quiz

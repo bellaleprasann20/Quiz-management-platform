@@ -28,15 +28,15 @@ const AttemptQuiz = () => {
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
         // 1. Fetch the basic Quiz details (Title, Time Limit, etc.)
-        const quizRes = await axios.get(`http://127.0.0.1:8000/api/v1/quizzes/${quizId}`, config);
+        const quizRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/quizzes/${quizId}`, config);
         setQuiz(quizRes.data);
 
         // 2. Fetch the SECURE randomized questions for this specific attempt!
-        const questionsRes = await axios.get(`http://127.0.0.1:8000/api/v1/questions/quiz/${quizId}/take`, config);
+        const questionsRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/questions/quiz/${quizId}/take`, config);
         setQuestions(questionsRes.data);
 
         // 3. Tell the backend we are starting an attempt (Requires your attempts backend!)
-        const attemptRes = await axios.post(`http://127.0.0.1:8000/api/v1/attempts/start`, { quiz_id: parseInt(quizId) }, config);
+        const attemptRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/attempts/start`, { quiz_id: parseInt(quizId) }, config);
         setAttemptId(attemptRes.data.id); 
 
         setError(null);
@@ -64,7 +64,7 @@ const AttemptQuiz = () => {
 
       // Submit the answers to be graded!
       await axios.post(
-        `http://127.0.0.1:8000/api/v1/attempts/${attemptId}/submit`, 
+        `${import.meta.env.VITE_API_URL}/api/v1/attempts/${attemptId}/submit`, 
         { answers: formattedAnswers },
         { headers: { Authorization: `Bearer ${token}` } }
       );

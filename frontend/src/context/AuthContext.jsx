@@ -2,7 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE = 'http://127.0.0.1:8000'; 
+// FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+const API_BASE = import.meta.env.VITE_API_URL; 
 
 // Attaches the saved token to every outgoing axios request, app-wide.
 axios.interceptors.request.use(
@@ -61,7 +62,7 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.setItem('token', access_token);
     
-    // FIXED: Explicitly attach the header here to bypass any interceptor delays!
+    // Explicitly attach the header here to bypass any interceptor delays!
     const meResponse = await axios.get(`${API_BASE}/api/v1/auth/me`, {
       headers: {
         Authorization: `Bearer ${access_token}`

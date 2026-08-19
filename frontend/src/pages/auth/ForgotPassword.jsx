@@ -25,7 +25,8 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/forgot-password', {
+      // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/forgot-password`, {
         email: formData.email
       });
       
@@ -57,7 +58,8 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      await axios.post('http://127.0.0.1:8000/api/v1/auth/reset-password', {
+      // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/reset-password`, {
         email: formData.email,
         otp: formData.otp,
         new_password: formData.newPassword

@@ -11,7 +11,8 @@ const Leaderboard = () => {
     const fetchLeaderboard = async () => {
       try {
         // Fetch real leaderboard data from the backend
-        const response = await axios.get('http://127.0.0.1:8000/api/v1/leaderboard/global?limit=20');
+        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/leaderboard/global?limit=20`);
         setLeaders(response.data);
       } catch (error) {
         console.error("Failed to fetch leaderboard:", error);

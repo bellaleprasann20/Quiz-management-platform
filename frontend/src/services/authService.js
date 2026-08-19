@@ -8,7 +8,8 @@ const authService = {
     formData.append('username', email); // Assuming backend uses email for login
     formData.append('password', password);
 
-    const response = await api.post('/auth/login', formData, {
+    // FIX APPLIED: Added /api/v1
+    const response = await api.post('/api/v1/auth/login', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -17,12 +18,14 @@ const authService = {
   },
 
   register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
+    // FIX APPLIED: Added /api/v1
+    const response = await api.post('/api/v1/auth/register', userData);
     return response.data;
   },
 
   getCurrentUser: async () => {
-    const response = await api.get('/auth/me');
+    // FIX APPLIED: Added /api/v1
+    const response = await api.get('/api/v1/auth/me');
     return response.data;
   }
 };

@@ -3,22 +3,26 @@ import api from './api';
 
 const userService = {
   getUsers: async (skip = 0, limit = 100) => {
-    const response = await api.get(`/users/?skip=${skip}&limit=${limit}`);
+    // FIX APPLIED: Added /api/v1
+    const response = await api.get(`/api/v1/users/?skip=${skip}&limit=${limit}`);
     return response.data;
   },
 
   getUserById: async (id) => {
-    const response = await api.get(`/users/${id}`);
+    // FIX APPLIED: Added /api/v1
+    const response = await api.get(`/api/v1/users/${id}`);
     return response.data;
   },
 
   updateUser: async (id, userData) => {
-    const response = await api.put(`/users/${id}`, userData);
+    // FIX APPLIED: Added /api/v1
+    const response = await api.put(`/api/v1/users/${id}`, userData);
     return response.data;
   },
 
   deleteUser: async (id) => {
-    const response = await api.delete(`/users/${id}`);
+    // FIX APPLIED: Added /api/v1
+    const response = await api.delete(`/api/v1/users/${id}`);
     return response.data;
   },
 };

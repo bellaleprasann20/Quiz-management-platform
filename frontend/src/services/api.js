@@ -1,8 +1,9 @@
 // frontend/src/services/api.js
 import axios from 'axios';
 
-// Fallback to localhost if environment variable is missing
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+// FIX APPLIED HERE: Removed the hardcoded localhost fallback to ensure 
+// strict reliance on the Vercel environment variable.
+const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
