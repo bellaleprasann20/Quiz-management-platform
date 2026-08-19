@@ -14,5 +14,5 @@ COPY . .
 # Expose the port FastAPI runs on
 EXPOSE 8000
 
-# Command to run the application using Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run the application using Uvicorn with Render's dynamic port fallback
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
