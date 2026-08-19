@@ -7,8 +7,10 @@ import { useAuth } from '../../context/AuthContext';
 
 const Register = () => {
   const navigate = useNavigate();
-  // Bring in BOTH register and login from your context!
-  const { register, login } = useAuth(); 
+  
+  // Safe fallback in case useAuth is not wrapping the app correctly
+  const authContext = useAuth() || {};
+  const { register, login } = authContext; 
   
   const [formData, setFormData] = useState({ role: 'student', name: '', email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
@@ -31,16 +33,23 @@ const Register = () => {
     
     try {
       if (formData.role === 'admin') {
-        // === ADMIN MODE: Act as a Sign In Form ===
+        if (!login) throw new Error("The 'login' function is missing from AuthContext!");
         await login({ email: formData.email, password: formData.password });
         navigate('/admin/dashboard');
       } else {
-        // === STUDENT MODE: Act as a Registration Form ===
+        if (!register) throw new Error("The 'register' function is missing from AuthContext! Is it named 'signup' instead?");
         await register(formData);
         navigate('/student/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || "An error occurred. Please try again.");
+      // === BUG CATCHER ===
+      console.error("🚨 FRONTEND CRASH REPORT:", err);
+      
+      const serverError = err.response?.data?.detail;
+      const localError = err.message; // Grabs exact JS or Network errors (e.g. "Network Error" or "register is not a function")
+      
+      // Display the exact error on the UI
+      setError(serverError || localError || "An unknown error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +59,6 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-violet-100 p-4 py-12">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8 transform transition-all">
         
-        {/* Dynamic Header */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
             <span className="text-white font-bold text-2xl">Q</span>
@@ -63,7 +71,6 @@ const Register = () => {
           </p>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-lg flex items-start gap-3 text-rose-600">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -73,7 +80,6 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           
-          {/* Role Selection Toggle */}
           <div className="flex gap-4 mb-2">
             <button
               type="button"
@@ -102,7 +108,6 @@ const Register = () => {
             </button>
           </div>
 
-          {/* Conditional Field: Only show Name if role is 'student' */}
           {formData.role === 'student' && (
             <div className="animate-in fade-in slide-in-from-top-2 duration-300">
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
@@ -123,7 +128,6 @@ const Register = () => {
             </div>
           )}
 
-          {/* Always Show Email */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
             <div className="relative">
@@ -142,7 +146,6 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Always Show Password */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
             <div className="relative">
@@ -162,13 +165,11 @@ const Register = () => {
           </div>
 
           <Button type="submit" variant="primary" className="w-full mt-2" isLoading={isLoading}>
-            {/* Dynamic Icon and Text */}
             {!isLoading && (formData.role === 'admin' ? <LogIn className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />)}
             {formData.role === 'admin' ? 'Sign In' : 'Create Account'}
           </Button>
         </form>
 
-        {/* Dynamic Footer */}
         <div className="mt-8 text-center text-sm text-slate-600">
           {formData.role === 'admin' ? "Don't have an admin account? " : "Already have an account? "}
           <Link to="/auth/login" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">

@@ -4,18 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, AlertCircle, UserPlus, GraduationCap, Shield } from 'lucide-react';
 import Button from '../../components/common/Button';
 import { useAuth } from '../../context/AuthContext'; 
-import axios from 'axios'; // Needed for registration
+import axios from 'axios'; 
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth(); 
   
-  // NEW: Added states to handle tabs and form modes!
-  const [role, setRole] = useState('student'); // 'student' or 'admin'
-  const [isLogin, setIsLogin] = useState(true); // true = Sign In, false = Create Account
+  const [role, setRole] = useState('student'); 
+  const [isLogin, setIsLogin] = useState(true); 
   
   const [formData, setFormData] = useState({ 
-    username: '', // Added for registration
+    username: '', 
     email: '', 
     password: '' 
   });
@@ -35,31 +34,51 @@ const Login = () => {
     try {
       if (isLogin) {
         // === SIGN IN LOGIC ===
-        // Just call login, don't worry about what it returns
         await login({ email: formData.email, password: formData.password });
         
-        // FIXED: Use the 'role' state from the tabs to decide where to navigate!
         if (role === 'admin') {
           navigate('/admin/dashboard');
         } else {
           navigate('/student/dashboard');
         }
       } else {
-        // === CREATE ACCOUNT LOGIC (Students Only) ===
-        // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
-       // Old code causing the error
-await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/register`, {
-  username: formData.username,
-  email: formData.email,
-  password: formData.password,
-  role: 'student' 
-});
+        // === CREATE ACCOUNT LOGIC ===
         
+        // 1. Check if Vercel actually loaded the API URL
+        const apiUrl = import.meta.env.VITE_API_URL;
+        if (!apiUrl) {
+          throw new Error("CRITICAL: VITE_API_URL is missing. Please check Vercel Environment Variables!");
+        }
+
+        // 2. Attempt the registration
+        await axios.post(`${apiUrl}/api/v1/auth/register`, {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          role: 'student' 
+        });
+        
+        // 3. Log them in automatically after successful registration
         await login({ email: formData.email, password: formData.password });
         navigate('/student/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || "An error occurred. Please try again.");
+      // === BUG CATCHER ===
+      console.error("🚨 FRONTEND CRASH REPORT:", err);
+      
+      // Look for a specific backend rejection reason
+      let serverError = err.response?.data?.detail || err.response?.data?.message;
+      
+      // If FastAPI sends a 422 Validation Error, it formats 'detail' as an array. We need to turn it into readable text.
+      if (Array.isArray(serverError)) {
+        serverError = serverError.map(e => `'${e.loc[e.loc.length - 1]}' ${e.msg}`).join(', ');
+      }
+
+      // Grab raw local errors (e.g., "Network Error")
+      const localError = err.message; 
+      
+      // Display the most accurate error possible
+      setError(serverError || localError || "An unknown error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +101,7 @@ await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/register`, {
           </p>
         </div>
 
-        {/* NEW: Role Selection Tabs */}
+        {/* Role Selection Tabs */}
         <div className="flex p-1 bg-slate-100 rounded-lg mb-6">
           <button
             onClick={() => setRole('student')}
@@ -94,7 +113,6 @@ await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/register`, {
           </button>
           
           <button
-            // THIS IS THE MAGIC FIX: Clicking Admin forces the form into Sign-In mode!
             onClick={() => {
               setRole('admin');
               setIsLogin(true); 
@@ -109,7 +127,7 @@ await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/register`, {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-lg flex items-start gap-3 text-rose-600">
+          <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-lg flex items-start gap-3 text-rose-600 break-words">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
             <p className="text-sm font-medium">{error}</p>
           </div>
