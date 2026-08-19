@@ -47,7 +47,7 @@ const Login = () => {
       } else {
         // === CREATE ACCOUNT LOGIC (Students Only) ===
         // FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
-        await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/register`, {
+       await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/register`, {
           username: formData.username,
           email: formData.email,
           password: formData.password,
