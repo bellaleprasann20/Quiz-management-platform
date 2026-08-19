@@ -20,24 +20,24 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# === ROBUST CORS SETUP FOR PUBLIC TESTING ===
-# Option A: For open public testing where anyone can test from any frontend URL:
-origins = ["*"]
+# === ROBUST CORS SETUP FOR PRODUCTION ===
+origins = [
+    "http://localhost:3000", 
+    "http://127.0.0.1:3000", 
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
-# Option B: If you want stricter control, keep specific origins + environment variable:
-# origins = [
-#     "http://localhost:3000", 
-#     "http://127.0.0.1:3000", 
-#     "http://localhost:5173",
-#     "http://127.0.0.1:5173",
-# ]
-# frontend_url = os.getenv("FRONTEND_URL")
-# if frontend_url:
-#     origins.append(frontend_url)
+# Fetch the frontend URL from Render environment variables
+frontend_url = os.getenv("FRONTEND_URL")
+
+# If Render has the variable, add it to our allowed list
+if frontend_url:
+    origins.append(frontend_url)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, # Using ["*"] ensures zero CORS blocking for public testers
+    allow_origins=origins, 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
