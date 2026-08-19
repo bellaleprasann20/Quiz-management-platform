@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-// FIX APPLIED HERE: Replaced hardcoded localhost with the Vercel-ready environment variable
 const API_BASE = import.meta.env.VITE_API_URL; 
 
 // Attaches the saved token to every outgoing axios request, app-wide.
@@ -49,6 +48,13 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setIsLoading(false));
   }, []);
 
+  // === NEW: THE MISSING REGISTER FUNCTION ===
+  const register = async (userData) => {
+    // Sends the user's registration data directly to the backend
+    const response = await axios.post(`${API_BASE}/api/v1/auth/register`, userData);
+    return response.data;
+  };
+
   const login = async (credentials) => {
     const formData = new URLSearchParams();
     formData.append('username', credentials.email);
@@ -87,7 +93,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  const value = { user, token, isAuthenticated, isLoading, login, logout };
+  // === NEW: Added 'register' to the exported values so other files can use it! ===
+  const value = { user, token, isAuthenticated, isLoading, login, logout, register };
 
   return <AuthContext.Provider value={value}>{!isLoading && children}</AuthContext.Provider>;
 };
