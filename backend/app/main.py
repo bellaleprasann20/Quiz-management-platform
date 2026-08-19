@@ -1,12 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os # NEW: Import os to read environment variables
+import os
 
 from app.core.database import engine, Base
 from app.core.config import settings
 
-# 🚨 This is the magic line! It forces Python to read our __init__.py 
-# and register all database tables before any traffic hits the server.
+# Forces Python to read our __init__.py and register all database tables
 import app.models 
 
 from app.api import (
@@ -21,25 +20,24 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# === NEW CORS SETUP ===
-# 1. Keep local addresses so you can still test on your computer
-origins = [
-    "http://localhost:3000", 
-    "http://127.0.0.1:3000", 
-    "http://localhost:5173",
-    "http://127.0.0.1:5173"
-]
+# === ROBUST CORS SETUP FOR PUBLIC TESTING ===
+# Option A: For open public testing where anyone can test from any frontend URL:
+origins = ["*"]
 
-# 2. Grab the production frontend URL from the environment (Render)
-frontend_url = os.getenv("FRONTEND_URL")
-if frontend_url:
-    origins.append(frontend_url)
-    # Vercel often creates preview URLs, so if you run into strict CORS issues later,
-    # you can temporarily set origins = ["*"] during your initial testing phase.
+# Option B: If you want stricter control, keep specific origins + environment variable:
+# origins = [
+#     "http://localhost:3000", 
+#     "http://127.0.0.1:3000", 
+#     "http://localhost:5173",
+#     "http://127.0.0.1:5173",
+# ]
+# frontend_url = os.getenv("FRONTEND_URL")
+# if frontend_url:
+#     origins.append(frontend_url)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, 
+    allow_origins=origins, # Using ["*"] ensures zero CORS blocking for public testers
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
