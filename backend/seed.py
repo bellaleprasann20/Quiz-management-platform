@@ -6,7 +6,8 @@ from app.core.database import SessionLocal, engine, Base
 import app.models 
 
 def run_seed():
-    print("🏗️ Building database tables...")
+    print("🗑️ Wiping old database and creating fresh tables...")
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     
     print("🌱 Reading from database/seed.sql...")
@@ -30,22 +31,13 @@ def run_seed():
             
         # Split the file by semicolon to execute each command individually
         sql_commands = sql_content.split(';')
-        
         for command in sql_commands:
             clean_command = command.strip()
             if clean_command:
-                try:
-                    db.execute(text(clean_command))
-                    db.commit()
-                except Exception as cmd_error:
-                    # If it's a unique constraint violation, roll back just this statement and continue
-                    db.rollback()
-                    if "UNIQUE constraint failed" in str(cmd_error) or "duplicate key" in str(cmd_error):
-                        print(f"ℹ️ Skipping duplicate entry (already seeded).")
-                    else:
-                        print(f"⚠️ Notice on command execution: {cmd_error}")
+                db.execute(text(clean_command))
             
-        print("✅ Seeding process completed successfully!")
+        db.commit()
+        print("✅ Database wiped, categories created, and all 50+ quizzes seeded successfully!")
         
     except Exception as e:
         print(f"❌ Error during seeding: {e}")
