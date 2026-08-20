@@ -71,16 +71,4 @@ app.include_router(leaderboard.router, prefix="/api/v1")
 
 @app.get("/")
 def root():
-    return {"message": "API is running"}
-
-# === TEMPORARY FORCE-SEED ROUTE ===
-@app.get("/api/v1/secret-seed-db")
-def secret_seed():
-    backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if backend_root not in sys.path:
-        sys.path.append(backend_root)
-    
-    import seed
-    seed.run_seed()
-    
-    return {"message": "✅ BOOM! Fully seeded! 51 Quizzes loaded!"}
+    return {"message": "API is running securely!"}
