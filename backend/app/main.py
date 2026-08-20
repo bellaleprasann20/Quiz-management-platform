@@ -1,19 +1,33 @@
 import os
+import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.database import engine, Base
+from app.core.database import engine, Base, SessionLocal
 from app.core.config import settings
-
-# Forces Python to read our __init__.py and register all database tables
 import app.models 
+from app.models.user import User
 
-from app.api import (
-    auth, users, categories, quizzes, questions, attempts, analytics, leaderboard
-)
-
+# 1. Create the database tables
 Base.metadata.create_all(bind=engine)
 
+# 2. THE IMMORTAL DATABASE HACK: Auto-seed if Render wiped the database
+backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if backend_root not in sys.path:
+    sys.path.append(backend_root)
+
+try:
+    db = SessionLocal()
+    # Check if the Admin user exists. If not, the database is empty!
+    if not db.query(User).first():
+        print("⚠️ Render wiped the database! Auto-seeding now...")
+        import seed
+        seed.run_seed()
+    db.close()
+except Exception as e:
+    print(f"Auto-seed error: {e}")
+
+# 3. Start the application
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="Backend API for the Quiz Management Platform",
@@ -29,7 +43,6 @@ origins = [
     "https://quiz-management-platform-lac.vercel.app"
 ]
 
-# Fetch the frontend URL from Render environment variables dynamically
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
     origins.append(frontend_url)
@@ -37,13 +50,16 @@ if frontend_url:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins, 
-    allow_origin_regex=r"https://.*\.vercel\.app",  # Allows any Vercel preview URL
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include all API routers under v1
+from app.api import (
+    auth, users, categories, quizzes, questions, attempts, analytics, leaderboard
+)
+
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(categories.router, prefix="/api/v1")
