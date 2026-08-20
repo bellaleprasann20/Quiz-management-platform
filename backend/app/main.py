@@ -37,6 +37,7 @@ if frontend_url:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins, 
+    allow_origin_regex=r"https://.*\.vercel\.app",  # Add this magic line!
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
