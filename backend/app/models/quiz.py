@@ -11,7 +11,9 @@ class Quiz(Base):
     description = Column(String, nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"))
     
-    # New columns matching your seed.sql
+    # === NEW: Link the quiz to a User! ===
+    creator_id = Column(Integer, ForeignKey("users.id"))
+    
     difficulty = Column(String, default="BEGINNER")
     duration = Column(Integer, default=15)
     passing_score = Column(Integer, default=70)
@@ -24,3 +26,5 @@ class Quiz(Base):
     category = relationship("Category", back_populates="quizzes")
     questions = relationship("Question", back_populates="quiz", cascade="all, delete-orphan")
     attempts = relationship("Attempt", back_populates="quiz", cascade="all, delete-orphan")
+    # === NEW: Tell SQLAlchemy about the User relationship ===
+    creator = relationship("User", back_populates="quizzes")
