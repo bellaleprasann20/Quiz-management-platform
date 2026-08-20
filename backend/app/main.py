@@ -1,5 +1,4 @@
 import os
-import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -56,15 +55,3 @@ app.include_router(leaderboard.router, prefix="/api/v1")
 @app.get("/")
 def root():
     return {"message": "API is running"}
-
-# === ONE-TIME SECRET DB SEED ROUTE ===
-@app.get("/api/v1/secret-seed-db")
-def secret_seed():
-    # This tells Python where to find your seed.py file
-    backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    sys.path.append(backend_root)
-    
-    import seed
-    seed.run_seed()
-    
-    return {"message": "✅ BOOM! Render database successfully seeded for free!"}
