@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
-# Embedded Answer Schemas
+# --- Embedded Answer Schemas ---
 class AnswerBase(BaseModel):
     question_id: int
     selected_option: Optional[str] = None
@@ -17,7 +17,8 @@ class AnswerOut(AnswerBase):
     class Config:
         from_attributes = True
 
-# Attempt Schemas
+
+# --- Attempt Schemas ---
 class AttemptBase(BaseModel):
     quiz_id: int
 

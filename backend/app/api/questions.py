@@ -9,6 +9,7 @@ from app.models.option import Option
 
 router = APIRouter(prefix="/questions", tags=["questions"])
 
+
 @router.get("/quiz/{quiz_id}")
 def get_quiz_questions(quiz_id: int, db: Session = Depends(get_db)):
     """
@@ -39,6 +40,7 @@ def get_quiz_questions(quiz_id: int, db: Session = Depends(get_db)):
         })
         
     return full_data
+
 
 @router.get("/quiz/{quiz_id}/take")
 def take_quiz_questions(quiz_id: int, db: Session = Depends(get_db)):
@@ -71,6 +73,7 @@ def take_quiz_questions(quiz_id: int, db: Session = Depends(get_db)):
         
     return full_data
 
+
 @router.post("/bulk-upload/{quiz_id}")
 async def bulk_upload_questions(
     quiz_id: int,
@@ -98,7 +101,7 @@ async def bulk_upload_questions(
 
             new_question = Question(quiz_id=quiz_id, text=question_text)
             db.add(new_question)
-            db.flush()
+            db.flush() # Flushes to generate the question ID without committing the transaction
 
             try:
                 correct_option_index = int(row.get("Correct Option (1-4)", 1))
@@ -126,6 +129,7 @@ async def bulk_upload_questions(
         db.rollback()
         raise HTTPException(status_code=400, detail=f"Failed to process CSV: {str(e)}")
 
+
 @router.put("/{question_id}/correct-option/{option_id}")
 def update_correct_option(question_id: int, option_id: int, db: Session = Depends(get_db)):
     """
@@ -152,6 +156,7 @@ def update_correct_option(question_id: int, option_id: int, db: Session = Depend
     db.commit()
     return {"message": "Correct answer updated successfully!"}
 
+
 @router.delete("/{question_id}")
 def delete_question(question_id: int, db: Session = Depends(get_db)):
     """
@@ -161,12 +166,10 @@ def delete_question(question_id: int, db: Session = Depends(get_db)):
     """
     question = db.query(Question).filter(Question.id == question_id).first()
     
-    # If the database can't find it, return a 404
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
         
     try:
-        # Delete the question and commit the changes
         db.delete(question)
         db.commit()
         return {"message": "Question deleted successfully!"}

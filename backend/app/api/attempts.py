@@ -1,15 +1,15 @@
 from typing import List
+from datetime import datetime
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 from app.core.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.models.attempt import Attempt
 from app.models.option import Option
-from app.models.quiz import Quiz  # <-- Added Quiz import
+from app.models.quiz import Quiz  
 
 router = APIRouter(prefix="/attempts", tags=["attempts"])
 
@@ -27,10 +27,15 @@ class SubmitAttemptRequest(BaseModel):
 
 # --- Endpoints ---
 @router.post("/start")
-def start_attempt(payload: StartAttemptRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def start_attempt(
+    payload: StartAttemptRequest, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+):
     """
     Initializes a new quiz attempt.
     """
+    # Safety check for interview/attempt bans
     if hasattr(current_user, "interview_ban_until") and current_user.interview_ban_until and current_user.interview_ban_until > datetime.utcnow():
         raise HTTPException(status_code=403, detail="You are currently banned from starting new attempts.")
         
@@ -39,9 +44,11 @@ def start_attempt(payload: StartAttemptRequest, db: Session = Depends(get_db), c
         quiz_id=payload.quiz_id,
         start_time=datetime.utcnow()
     )
+    
     db.add(new_attempt)
     db.commit()
     db.refresh(new_attempt)
+    
     return new_attempt
 
 
@@ -55,7 +62,10 @@ def submit_attempt(
     """
     Grades the quiz and saves the final score.
     """
-    attempt = db.query(Attempt).filter(Attempt.id == attempt_id, Attempt.user_id == current_user.id).first()
+    attempt = db.query(Attempt).filter(
+        Attempt.id == attempt_id, 
+        Attempt.user_id == current_user.id
+    ).first()
     
     if not attempt:
         raise HTTPException(status_code=404, detail="Attempt not found")
@@ -70,7 +80,10 @@ def submit_attempt(
     attempt.score = score
     db.commit()
     
-    return {"message": "Quiz graded and submitted successfully!", "final_score": score}
+    return {
+        "message": "Quiz graded and submitted successfully!", 
+        "final_score": score
+    }
 
 
 @router.get("/history/me")
@@ -86,17 +99,17 @@ def get_user_history(
         Attempt.user_id == current_user.id
     ).order_by(Attempt.start_time.desc()).all()
     
-    # --- THE FIX ---
-    # Loop through the attempts and fetch the Quiz Title for each one
     history_data = []
+    
     for attempt in attempts:
+        # Fetch the corresponding quiz to get the title
         quiz = db.query(Quiz).filter(Quiz.id == attempt.quiz_id).first()
         
         history_data.append({
             "id": attempt.id,
             "user_id": attempt.user_id,
             "quiz_id": attempt.quiz_id,
-            "quiz_title": quiz.title if quiz else f"Quiz #{attempt.quiz_id}", # Add the actual title here!
+            "quiz_title": quiz.title if quiz else f"Quiz #{attempt.quiz_id}", 
             "score": attempt.score,
             "start_time": attempt.start_time,
             "end_time": attempt.end_time

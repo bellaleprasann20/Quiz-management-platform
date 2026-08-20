@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+
 from app.models.user import User
 from app.schemas.auth import RegisterRequest
 from app.core.security import hash_password, verify_password, create_access_token
@@ -21,6 +22,7 @@ def register_user(db: Session, payload: RegisterRequest) -> User:
     db.refresh(new_user)
     return new_user
 
+
 def authenticate_user(db: Session, email: str, password: str) -> User:
     user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(password, user.hashed_password):
@@ -31,7 +33,9 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
         )
     return user
 
+
 def issue_token(user: User) -> str:
-    # We store the email as the subject ("sub") and include the role
-    token_data = {"sub": user.email, "role": user.role.value if hasattr(user.role, 'value') else user.role}
+    # Store the email as the subject ("sub") and include the role safely
+    role_value = user.role.value if hasattr(user.role, 'value') else user.role
+    token_data = {"sub": user.email, "role": role_value}
     return create_access_token(data=token_data)

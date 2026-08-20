@@ -1,6 +1,6 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 from app.core.database import engine, Base
 from app.core.config import settings
@@ -29,9 +29,8 @@ origins = [
     "https://quiz-management-platform-lac.vercel.app"
 ]
 
-# Fetch the frontend URL from Render environment variables
+# Fetch the frontend URL from Render environment variables dynamically
 frontend_url = os.getenv("FRONTEND_URL")
-
 if frontend_url:
     origins.append(frontend_url)
 
@@ -43,6 +42,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include all API routers under v1
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(categories.router, prefix="/api/v1")

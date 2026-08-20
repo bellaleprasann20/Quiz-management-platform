@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from sqlalchemy.sql import func  # <-- Imported for database-level timestamps
+
 from app.core.database import Base
 
 class Quiz(Base):
@@ -11,7 +12,7 @@ class Quiz(Base):
     description = Column(String, nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"))
     
-    # === NEW: Link the quiz to a User! ===
+    # === Link the quiz to a User! ===
     creator_id = Column(Integer, ForeignKey("users.id"))
     
     difficulty = Column(String, default="BEGINNER")
@@ -20,11 +21,13 @@ class Quiz(Base):
     status = Column(String, default="published")
     max_attempts = Column(Integer, default=3)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    # THE FIX: Let the PostgreSQL database server calculate the exact timestamp
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
     category = relationship("Category", back_populates="quizzes")
     questions = relationship("Question", back_populates="quiz", cascade="all, delete-orphan")
     attempts = relationship("Attempt", back_populates="quiz", cascade="all, delete-orphan")
-    # === NEW: Tell SQLAlchemy about the User relationship ===
+    
+    # === Tell SQLAlchemy about the User relationship ===
     creator = relationship("User", back_populates="quizzes")

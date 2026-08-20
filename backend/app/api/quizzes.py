@@ -6,6 +6,10 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.quiz import Quiz
 
+# === NEW: Import user models to fix the Ghost Quiz bug ===
+from app.models.user import User
+from app.dependencies.auth import get_current_user
+
 router = APIRouter(prefix="/quizzes", tags=["quizzes"])
 
 # 1. Define what the React form data should look like
@@ -19,11 +23,12 @@ class QuizFormSchema(BaseModel):
     status: str = "draft"
     max_attempts: int = 3
 
+
 @router.get("/")
 def get_all_quizzes(
     category_id: Optional[int] = Query(None), 
     search: Optional[str] = Query(None),  
-    difficulty: Optional[str] = Query(None), # NEW: Added difficulty parameter
+    difficulty: Optional[str] = Query(None), 
     db: Session = Depends(get_db)
 ):
     query = db.query(Quiz)
@@ -34,9 +39,10 @@ def get_all_quizzes(
         
     # Filter by search term if one is provided
     if search:
+        # .ilike() ensures case-insensitive searching in PostgreSQL
         query = query.filter(Quiz.title.ilike(f"%{search}%"))
         
-    # NEW: Filter by difficulty if one is provided
+    # Filter by difficulty if one is provided
     if difficulty:
         query = query.filter(Quiz.difficulty == difficulty)
         
@@ -59,6 +65,7 @@ def get_all_quizzes(
         } for quiz in quizzes
     ]
 
+
 @router.get("/{quiz_id}")
 def get_quiz(quiz_id: int, db: Session = Depends(get_db)):
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
@@ -66,22 +73,37 @@ def get_quiz(quiz_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Quiz not found")
     return quiz
 
+
 # 2. Endpoint to CREATE a new quiz (Handles the form submission)
 @router.post("/")
-def create_quiz(quiz_data: QuizFormSchema, db: Session = Depends(get_db)):
+def create_quiz(
+    quiz_data: QuizFormSchema, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user) # <-- FETCH LOGGED-IN ADMIN
+):
     try:
-        new_quiz = Quiz(**quiz_data.model_dump()) 
+        # === THE FIX ===
+        # Unpack the form data, and inject the current_user's ID as the creator_id!
+        new_quiz = Quiz(**quiz_data.model_dump(), creator_id=current_user.id) 
+        
         db.add(new_quiz)
         db.commit()
         db.refresh(new_quiz)
+        
         return {"message": "Quiz created successfully!", "quiz": new_quiz}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
+
 # 3. Endpoint to UPDATE an existing quiz (Handles editing a quiz)
 @router.put("/{quiz_id}")
-def update_quiz(quiz_id: int, quiz_data: QuizFormSchema, db: Session = Depends(get_db)):
+def update_quiz(
+    quiz_id: int, 
+    quiz_data: QuizFormSchema, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user) # <-- Added for security
+):
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
     
     if not quiz:

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import User
 from app.core.security import hash_password 
-from app.dependencies.auth import get_current_user  # Added to secure the profile route
+from app.dependencies.auth import get_current_user  
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -16,7 +16,6 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
-# Schema for the React Profile Update Form
 class UserProfileUpdate(BaseModel):
     name: Optional[str] = None  
     phone: Optional[str] = None
@@ -26,7 +25,6 @@ class UserProfileUpdate(BaseModel):
     password: Optional[str] = None
 
 # --- Endpoints ---
-
 @router.get("/")
 def get_all_users(db: Session = Depends(get_db)):
     """
@@ -44,6 +42,7 @@ def get_all_users(db: Session = Depends(get_db)):
             "is_active": u.is_active
         } for u in users
     ]
+
 
 @router.post("/register")
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -80,6 +79,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.put("/profile")
 def update_profile(

@@ -1,36 +1,43 @@
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from datetime import datetime
+
 from app.models.attempt import Attempt
 from app.models.user import User
 
 def start_attempt(db: Session, user: User, quiz_id: int) -> Attempt:
-    if user.interview_ban_until and user.interview_ban_until > datetime.utcnow():
-        raise HTTPException(status_code=403, detail="You are currently banned from starting new attempts.")
+    # Check if the user is currently banned due to anti-cheat rules
+    if user.interview_ban_until and user.interview_ban_until > datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=403, 
+            detail="You are currently banned from starting new attempts."
+        )
         
     attempt = Attempt(
         user_id=user.id,
         quiz_id=quiz_id,
-        start_time=datetime.utcnow()
+        start_time=datetime.now(timezone.utc)
     )
     db.add(attempt)
     db.commit()
     db.refresh(attempt)
     return attempt
 
+
 def submit_attempt(db: Session, attempt_id: int, user_id: int, score: int) -> Attempt:
-    attempt = db.query(Attempt).filter(Attempt.id == attempt_id, Attempt.user_id == user_id).first()
+    attempt = db.query(Attempt).filter(
+        Attempt.id == attempt_id, 
+        Attempt.user_id == user_id
+    ).first()
     
     if not attempt:
         raise HTTPException(status_code=404, detail="Attempt not found")
+        
     if attempt.end_time:
         raise HTTPException(status_code=400, detail="This attempt has already been submitted.")
         
-    attempt.end_time = datetime.utcnow()
+    attempt.end_time = datetime.now(timezone.utc)
     attempt.score = score
-    
-    # Example timer validation could go here
-    # time_taken = (attempt.end_time - attempt.start_time).total_seconds()
     
     db.commit()
     db.refresh(attempt)

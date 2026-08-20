@@ -1,11 +1,16 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from app.models.attempt import Attempt
 from app.models.question import Question
 
 def calculate_quiz_average(db: Session, quiz_id: int) -> int:
-    """Calculates the average percentage score for a specific quiz."""
-    attempts = db.query(Attempt).filter(Attempt.quiz_id == quiz_id, Attempt.end_time.isnot(None)).all()
+    """
+    Calculates the average percentage score for a specific quiz.
+    """
+    attempts = db.query(Attempt).filter(
+        Attempt.quiz_id == quiz_id, 
+        Attempt.end_time.isnot(None)
+    ).all()
+    
     if not attempts:
         return 0
         

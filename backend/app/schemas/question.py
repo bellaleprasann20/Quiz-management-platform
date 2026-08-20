@@ -1,7 +1,7 @@
-from pydantic import BaseModel
 from typing import Optional, List
+from pydantic import BaseModel
 
-# Embedded Option Schemas
+# --- Embedded Option Schemas ---
 class OptionBase(BaseModel):
     text: str
     is_correct: bool = False
@@ -16,7 +16,8 @@ class OptionOut(OptionBase):
     class Config:
         from_attributes = True
 
-# Question Schemas
+
+# --- Question Schemas ---
 class QuestionBase(BaseModel):
     quiz_id: int
     text: str

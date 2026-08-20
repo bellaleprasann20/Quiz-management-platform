@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
 from app.core.config import settings
 from app.models.user import User
@@ -33,7 +34,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
         
     # Extra safety check
-    if not user.is_active:
+    if not getattr(user, "is_active", True):
         raise HTTPException(status_code=400, detail="This user account is inactive")
         
     return user

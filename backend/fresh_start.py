@@ -33,8 +33,13 @@ def rebuild_everything():
         
         print("📂 3. Loading Categories and Quizzes from database/seed.sql...")
         
-        # This line now looks exactly one folder "up" for the database folder
-        sql_file_path = os.path.abspath(os.path.join(os.getcwd(), "..", "database", "seed.sql"))
+        # Robust path resolution relative to this file's location
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        sql_file_path = os.path.abspath(os.path.join(current_dir, "..", "..", "database", "seed.sql"))
+        
+        # Fallback to previous behavior if nested differently
+        if not os.path.exists(sql_file_path):
+            sql_file_path = os.path.abspath(os.path.join(os.getcwd(), "..", "database", "seed.sql"))
         
         if os.path.exists(sql_file_path):
             with open(sql_file_path, "r", encoding="utf-8") as file:
@@ -46,7 +51,7 @@ def rebuild_everything():
                 db.commit()
             print("✅ SQL file loaded successfully!")
         else:
-            print(f"⚠️ Could not find {sql_file_path}, skipping SQL injection.")
+            print(f"⚠️ Could not find seed file at {sql_file_path}, skipping SQL injection.")
             
         print("\n🎉 FRESH START COMPLETE! Admin account ready.")
         print("👉 Students can now create their own accounts using the Register endpoint.")

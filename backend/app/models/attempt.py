@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from sqlalchemy.sql import func  # <-- Imported func for database-level timestamps
+
 from app.core.database import Base
 
 class Attempt(Base):
@@ -10,8 +11,10 @@ class Attempt(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     quiz_id = Column(Integer, ForeignKey("quizzes.id"))
     score = Column(Integer, nullable=True)
-    start_time = Column(DateTime, default=datetime.utcnow)
-    end_time = Column(DateTime, nullable=True)
+    
+    # THE FIX: Let the PostgreSQL database server calculate the exact timestamp
+    start_time = Column(DateTime(timezone=True), server_default=func.now())
+    end_time = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     user = relationship("User", back_populates="attempts")

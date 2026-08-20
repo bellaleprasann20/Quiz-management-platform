@@ -1,18 +1,26 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+
 from app.models.user import User
 from app.models.attempt import Attempt
 
 def get_top_users(db: Session, limit: int = 10):
-    """Calculates the total XP for all users and returns the top players."""
+    """
+    Calculates the total XP for all users and returns the top players.
+    """
     results = db.query(
         User.username,
         func.sum(Attempt.score).label("total_score")
-    ).join(Attempt, User.id == Attempt.user_id) \
-     .filter(Attempt.end_time.isnot(None)) \
-     .group_by(User.id) \
-     .order_by(func.sum(Attempt.score).desc()) \
-     .limit(limit).all()
+    ).join(
+        Attempt, User.id == Attempt.user_id
+    ).filter(
+        Attempt.end_time.isnot(None)
+    ).group_by(
+        User.id,
+        User.username  # <-- Added for strict PostgreSQL compatibility!
+    ).order_by(
+        func.sum(Attempt.score).desc()
+    ).limit(limit).all()
 
     leaderboard = []
     for index, row in enumerate(results):
